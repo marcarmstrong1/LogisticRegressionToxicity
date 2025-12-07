@@ -1,19 +1,67 @@
-# LogisticRegressionToxicity
+# Toxicity Detection: Logistic Regression Baseline
 
-The idea behind this project is to build a model to determine if a comment on a website is considered "toxic."
+## Project Context
 
-The dataset comes from Kaggle.
+This project explores the efficiency of traditional machine learning algorithms in solving text classification problems.
 
-I decided to keep the method simple and to try a Logistic Regression. I noticed in the official competition that it was posed as a regression problem to determine a a toxicity score of 0-1 and that the leading scores were about 0.96 or so. I turned the problem into a classification problem instead.
+While the industry trend leans heavily toward large Deep Learning models (like BERT or RoBERTa) for Natural Language Processing, this repository demonstrates that a simple **Logistic Regression** classifier can often achieve production-grade accuracy with a fraction of the compute time and resources.
 
-My reasoning is that I am again trying to showcase a simple solution to a real world problem. The official competition was done to predict bias and I would rather have a system that just removes toxic comments. I am not a hater of free speech though so I put my toxic level at 0.6. If the toxicity value was at or above 0.6 then it was listed as toxic.
+## Problem Statement
 
-I built a simple Logistic Regression Classifier and achieved an overall accuracy rating of 0.96, again, this model was built and trained in 20 minutes. For real world problems this is fast and relatively elegant as a base to build from here.
+The goal is to automatically flag comments from an online discussion forum as "Toxic" or "Not Toxic."
 
-I love using Neural Nets but sometimes a simple algorithm can get the job done.
+The dataset originates from the **Jigsaw Unintended Bias in Toxicity Classification** challenge. While the original challenge posed this as a regression problem (predicting a toxicity score from 0.0 to 1.0), this project simplifies the task into a binary classification problem to determine immediate content moderation needs.
 
-WORK FOR THE FUTURE:
-Maybe actually build the regressor.
-Try NN with LSTM.
-How do SOTA Huggingface perform?
-Maybe try NaiveBayes
+## The Baseline Implementation
+
+The current script (`toxicity_model.py`) establishes a baseline using a Bag-of-Words approach weighted by TF-IDF.
+
+### Key Decisions
+
+1.  **Thresholding:** The original data contains a float value for toxicity. We have arbitrarily set a threshold of **0.6**.
+      * Score $< 0.6$: Label 0 (Safe)
+      * Score $\ge 0.6$: Label 1 (Toxic)
+      * *Reasoning:* This threshold allows for "free speech" and debate without flagging mildly heated arguments, focusing only on comments that are likely to be harmful.
+2.  **Vectorization:** We utilize **TF-IDF (Term Frequency-Inverse Document Frequency)** rather than word embeddings. This creates a sparse matrix representing the importance of specific words relative to the corpus.
+3.  **Algorithm:** We use **Logistic Regression**. Note that the code comments in previous versions may have referred to "Naive Bayes," but the actual implementation utilizes `sklearn.linear_model.LogisticRegression`.
+
+## Prerequisites
+
+### Libraries
+
+Install the required dependencies:
+
+```bash
+pip install pandas scikit-learn numpy
+```
+
+### Data Configuration
+
+**Important:** The script currently contains hardcoded file paths pointing to a local directory.
+
+  * Line 14: `df = pd.read_csv("C:/Users/...")`
+  * Line 49: `test = pd.read_csv("C:/Users/...")`
+
+**Action Required:** You must update these paths to point to your local copy of the `train.csv` and `test.csv` files before running the script.
+
+## The Challenge
+
+Your goal is to iterate on this baseline. The current model trains in minutes and achieves acceptable accuracy. Can you improve performance without exponentially increasing training time?
+
+### Recommended Experiments:
+
+1.  **Regression vs. Classification:** The current script forces a binary target. Modify the code to perform a **Regression** analysis instead (predicting the actual float value). Does the Logistic Regressor handle this well, or do you need a different algorithm (e.g., Ridge Regression or Support Vector Regression)?
+2.  **Compare Algorithms:** The code comments mention Naive Bayes. Implement a `MultinomialNB` classifier and compare its F1-score and training time against the Logistic Regression baseline.
+3.  **Deep Learning:** If you have the compute resources, implement an LSTM (Long Short-Term Memory) network or fine-tune a HuggingFace Transformer. Compare the inference speed of these complex models against the Logistic Regression baseline. Is the accuracy gain worth the extra latency?
+
+## Usage
+
+Run the script to train the model and output the classification report:
+
+```bash
+python toxicity_model.py
+```
+
+## Performance Note
+
+Initial tests with this simple architecture have shown high accuracy (approx. 96% in some iterations) with very low training overhead (approx. 20 minutes). This serves as the benchmark for any future complex implementations.
